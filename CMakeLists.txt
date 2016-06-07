@@ -8,12 +8,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(SOURCE_FILES main.cc discordpp.hh resource.hh)
 add_executable(discordpp ${SOURCE_FILES})
 
-add_subdirectory(lib/curlpp)
-
 find_package(Boost REQUIRED system filesystem)
 
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${Boost_LIBRARIES} curlpp pthread ssl crypto)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${Boost_LIBRARIES} pthread ssl crypto)
 
 foreach(DATFILE softcommands.dat token.dat) #login.dat
     #file(REMOVE ${CMAKE_BINARY_DIR}/${DATFILE})

@@ -7,10 +7,6 @@
 
 #include <vector>
 
-#include "lib/curlpp/include/curlpp/cURLpp.hpp"
-#include "lib/curlpp/include/curlpp/Easy.hpp"
-#include "lib/curlpp/include/curlpp/Options.hpp"
-#include "lib/curlpp/include/curlpp/Exception.hpp"
 #define STDC_HEADERS 1
 #include <string>
 
@@ -43,16 +39,10 @@ namespace discordpp{
             {
                 std::stringstream outstream;
 
-                cURLpp::Cleanup clean;
-                //curlpp::Cleanup clean;
-                curlpp::Easy request;
-                curlpp::options::WriteStream ws(&outstream);
-                request.setOpt(ws);
-                request.setOpt<curlpp::options::Url>("https://discordapp.com/api" + targetURL);
-                request.setOpt(curlpp::options::Verbose(false));
+                //Setup
 
                 if(!requestType.empty()) {
-                    request.setOpt(curlpp::options::CustomRequest(requestType));
+                    //Add request type
                 }
 
                 std::list<std::string> header;
@@ -60,15 +50,13 @@ namespace discordpp{
                 if(token != "") {
                     header.push_back(std::string("Authorization: ") + token);\
                 }
-                request.setOpt(curlpp::options::HttpHeader(header));
+                //Set header
 
                 if(!attachJSON.empty()) {
-                    //std::cout << attachJSON.dump() << std::endl;
-                    request.setOpt(curlpp::options::PostFields(attachJSON.dump()));
-                    request.setOpt(curlpp::options::PostFieldSize(attachJSON.dump().length()));
+                    //attach json
                 }
 
-                request.perform();
+                //Execute
 
                 json returned = json::parse(outstream.str());
 
@@ -87,11 +75,8 @@ namespace discordpp{
 
                 return returned;
             }
-            catch ( curlpp::LogicError & e ) {
-                std::cout << "logic " << e.what() << std::endl;
-            }
-            catch ( curlpp::RuntimeError & e ) {
-                std::cout << "runtime " << e.what() << std::endl;
+            catch ( /*catch error*/ ) {
+                std::cout << "error " << e.what() << std::endl;
             }
 
             return {};
