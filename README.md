@@ -36,7 +36,7 @@ Requirements <sup>(You need these)</sup>
 
 Included <sup>(Git submodules)</sup>
 ---
-* [cURLpp](https://github.com/jpbarrette/curlpp)
+* [cpr](https://github.com/whoshuu/cpr)
 * [nlohmann::json](https://github.com/nlohmann/json)
 
 Building <sup>(Almost Hell on Earth)</sup>

@@ -6,10 +6,9 @@
 #define DISCORDPP_DISCORDPP_HH
 
 #include <vector>
-
-#define STDC_HEADERS 1
 #include <string>
 
+#include <cpr/cpr.h>
 #include "lib/nlohmannjson/src/json.hpp"
 
 #include <websocketpp/config/asio_client.hpp>
@@ -35,6 +34,46 @@ namespace discordpp{
     namespace DiscordAPI {
         inline json call(std::string targetURL, std::string token, json attachJSON = {}, std::string requestType = ""){
             data::lastToken() = token;
+
+            auto url = cpr::Url{"https://discordapp.com/api" + targetURL};
+            auto header = cpr::Header{{"accept", "application/json"}};
+            if(token != "") {
+                header.insert({"Authorization", token});
+            }
+            auto body = cpr::Body{attachJSON.dump()};
+
+            //This is scary to look at. DOes anyone know a better way?
+            cpr::Response response;
+            if(requestType.empty() || strcasecmp(requestType.c_str(), "GET") == 0){
+                response = cpr::Get(url, header, body);
+            } else if (strcasecmp(requestType.c_str(), "POST")){
+                response = cpr::Post(url, header, body);
+            } else if (strcasecmp(requestType.c_str(), "PUT")){
+                response = cpr::Put(url, header, body);
+            } else if (strcasecmp(requestType.c_str(), "PATCH")){
+                response = cpr::Patch(url, header, body);
+            } else if (strcasecmp(requestType.c_str(), "DELETE")){
+                response = cpr::Delete(url, header, body);
+            } else if (strcasecmp(requestType.c_str(), "HEAD")){
+                response = cpr::Head(url, header, body);
+            } else if (strcasecmp(requestType.c_str(), "OPTIONS")){
+                response = cpr::Options(url, header, body);
+            } else {
+                std::cerr << "\"" << requestType << "\" can't be used as a request type.\n";
+                return {};
+            }
+
+            std::cout << response.text;
+
+            try {
+                std::string message = json::parse(response.text).at("message").get<std::string>();
+                if(!message.empty()) {
+                    std::cout << "Discord API sent a message: \"" << message << "\"" << std::endl;
+                }
+            } catch ( std::out_of_range & e) {} catch ( std::domain_error & e) {}
+
+            return json::parse(response.text);
+            /*
             try
             {
                 std::stringstream outstream;
@@ -75,11 +114,12 @@ namespace discordpp{
 
                 return returned;
             }
-            catch ( /*catch error*/ ) {
+            catch ( catch error ) {
                 std::cout << "error " << e.what() << std::endl;
             }
 
             return {};
+            */
         }
 
         namespace channels{
