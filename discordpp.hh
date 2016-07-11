@@ -23,7 +23,7 @@ namespace discordpp{
     using json = nlohmann::json;
     namespace asio = boost::asio;
     using boost::system::error_code;
-    using snowflake = uint64_t;
+    using snowflake = std::string;
 
     namespace data{
         inline bool& debug(){
@@ -99,17 +99,17 @@ namespace discordpp{
 
         namespace channels{
             inline json get(snowflake channelID, std::string token = data::lastToken()){
-                return DiscordAPI::call("/channels/" + std::to_string(channelID), token, {}, "GET");
+                return DiscordAPI::call("/channels/" + (channelID), token, {}, "GET");
             }
             inline json modify(snowflake channelID, json newParams, std::string token = data::lastToken()){
-                return DiscordAPI::call("/channels/" + std::to_string(channelID), token, newParams, "PATCH");
+                return DiscordAPI::call("/channels/" + (channelID), token, newParams, "PATCH");
             }
             //Can't use delete as a function, I'm guessing because of C++
             inline json close(snowflake channelID, std::string token = data::lastToken()){
-                return DiscordAPI::call("/channels/" + std::to_string(channelID), token, {}, "DELETE");
+                return DiscordAPI::call("/channels/" + (channelID), token, {}, "DELETE");
             }
             namespace messages{
-                inline json get(snowflake channelID, snowflake before = 0, snowflake after = 0, int limit = 50, std::string token = data::lastToken()){
+                inline json get(snowflake channelID, uint64_t before = 0, uint64_t after = 0, int limit = 50, std::string token = data::lastToken()){
                     json toSend;
                     if(before != 0){
                         toSend["before"] = before;
@@ -118,10 +118,10 @@ namespace discordpp{
                         toSend["after"] = after;
                     }
                     toSend["limit"] = limit;
-                    return DiscordAPI::call("/channels/" + std::to_string(channelID) + "/messages", token, toSend, "GET");
+                    return DiscordAPI::call("/channels/" + (channelID) + "/messages", token, toSend, "GET");
                 }
                 inline json create(snowflake channelID, std::string message, std::string nonce = "", bool isTTS = false, std::string token = data::lastToken()) {
-                    std::string callURL = "/channels/" + std::to_string(channelID) + "/messages";
+                    std::string callURL = "/channels/" + (channelID) + "/messages";
 
                     json toSend;
                     toSend["content"] = message;
@@ -133,7 +133,7 @@ namespace discordpp{
                     return DiscordAPI::call(callURL, token, toSend);
                 }
                 inline json edit(snowflake channelID, snowflake messageID, std::string message, std::string token = data::lastToken()) {
-                    std::string callURL = "/channels/" + std::to_string(channelID) + "/messages/" + std::to_string(messageID);
+                    std::string callURL = "/channels/" + (channelID) + "/messages/" + (messageID);
 
                     json toSend;
                     toSend["content"] = message;
@@ -141,20 +141,20 @@ namespace discordpp{
                     return DiscordAPI::call(callURL, token, toSend, "PATCH");
                 }
                 inline json remove(snowflake channelID, snowflake messageID, std::string token = data::lastToken()) {
-                    std::string callURL = "/channels/" + std::to_string(channelID) + "/messages/" + std::to_string(messageID);
+                    std::string callURL = "/channels/" + (channelID) + "/messages/" + (messageID);
                     return DiscordAPI::call(callURL, token, {}, "DELETE");
                 }
                 inline json acknowledge(snowflake channelID, snowflake messageID, std::string token = data::lastToken()){
-                    std::string callURL = "/channels/" + std::to_string(channelID) + "/messages/" + std::to_string(messageID) + "/ack";
+                    std::string callURL = "/channels/" + (channelID) + "/messages/" + (messageID) + "/ack";
                     return DiscordAPI::call(callURL, token);
                 }
                 //I'm not sure hw to handle the permissions. https://discordapp.com/developers/docs/resources/channel#edit-channel-permissions
                 namespace invites{
                     inline json get(snowflake channelID, std::string token = data::lastToken()){
-                        return DiscordAPI::call("/channels/" + std::to_string(channelID) + "/invites", token, {}, "GET");
+                        return DiscordAPI::call("/channels/" + (channelID) + "/invites", token, {}, "GET");
                     }
                     inline json create(snowflake channelID, int max_age = 0, int max_uses = 0, bool temporary = true, bool xkcdpass = false, std::string token = data::lastToken()) {
-                        std::string callURL = "/channels/" + std::to_string(channelID) + "/invites";
+                        std::string callURL = "/channels/" + (channelID) + "/invites";
 
                         json toSend;
                         if(max_age != 0)
@@ -168,7 +168,7 @@ namespace discordpp{
                     }
                 }
                 inline json typing(snowflake channelID, std::string token = data::lastToken()){
-                    return DiscordAPI::call("/channels/" + std::to_string(channelID) + "/typing", token, {}, "POST");
+                    return DiscordAPI::call("/channels/" + (channelID) + "/typing", token, {}, "POST");
                 }
             }
         };
@@ -185,14 +185,14 @@ namespace discordpp{
                 return DiscordAPI::call(callURL, token, toSend, "POST");
             }
             inline json get(snowflake guildID, std::string token = data::lastToken()){
-                return DiscordAPI::call("/guilds/" + std::to_string(guildID), token, {}, "GET");
+                return DiscordAPI::call("/guilds/" + (guildID), token, {}, "GET");
             }
             inline json modify(snowflake guildID, json newParams, std::string token = data::lastToken()){
-                return DiscordAPI::call("/guilds/" + std::to_string(guildID), token, newParams, "PATCH");
+                return DiscordAPI::call("/guilds/" + (guildID), token, newParams, "PATCH");
             }
             namespace channels{
                 inline json createText(snowflake guildID, std::string name, std::string token = data::lastToken()){
-                    std::string callURL = "/guilds/" + std::to_string(guildID) + "/channels";
+                    std::string callURL = "/guilds/" + (guildID) + "/channels";
 
                     json toSend;
                     toSend["name"] = name;
@@ -201,7 +201,7 @@ namespace discordpp{
                     return DiscordAPI::call(callURL, token, toSend, "POST");
                 }
                 inline json createVoice(snowflake guildID, std::string name, int bitrate, std::string token = data::lastToken()){
-                    std::string callURL = "/guilds/" + std::to_string(guildID) + "/channels";
+                    std::string callURL = "/guilds/" + (guildID) + "/channels";
 
                     json toSend;
                     toSend["name"] = name;
@@ -211,18 +211,18 @@ namespace discordpp{
                     return DiscordAPI::call(callURL, token, toSend, "POST");
                 }
                 inline json get(snowflake guildID, std::string token = data::lastToken()){
-                    return DiscordAPI::call("/guilds/" + std::to_string(guildID) + "/channels", token, {}, "GET");
+                    return DiscordAPI::call("/guilds/" + (guildID) + "/channels", token, {}, "GET");
                 }
                 inline json modify(snowflake guildID, json newParams, std::string token = data::lastToken()){
-                    return DiscordAPI::call("/guilds/" + std::to_string(guildID) + "/channels", token, newParams, "PATCH");
+                    return DiscordAPI::call("/guilds/" + (guildID) + "/channels", token, newParams, "PATCH");
                 }
             }
             namespace members{
                 inline json getInfo(snowflake guildID, snowflake userID, std::string token = data::lastToken()){
-                    return DiscordAPI::call("/guilds/" + std::to_string(guildID) + "/members/" + std::to_string(userID) , token, {}, "GET");
+                    return DiscordAPI::call("/guilds/" + (guildID) + "/members/" + (userID) , token, {}, "GET");
                 }
                 inline json getList(snowflake guildID, int limit = 1, int offset = 0, std::string token = data::lastToken()){
-                    std::string callURL = "/guilds/" + std::to_string(guildID) + "/members";
+                    std::string callURL = "/guilds/" + (guildID) + "/members";
 
                     json toSend;
                     toSend["limit"] = limit;
@@ -231,18 +231,18 @@ namespace discordpp{
                     return DiscordAPI::call(callURL, token, toSend, "GET");
                 }
                 inline json modify(snowflake guildID, snowflake userID, json newParams, std::string token = data::lastToken()) {
-                    return DiscordAPI::call("/guilds/" + std::to_string(guildID) + "/members/" + std::to_string(userID), token, newParams, "PATCH");
+                    return DiscordAPI::call("/guilds/" + (guildID) + "/members/" + (userID), token, newParams, "PATCH");
                 }
                 inline json remove(snowflake guildID, snowflake userID, std::string token = data::lastToken()){
-                    return DiscordAPI::call("/guilds/" + std::to_string(guildID) + "/members/" + std::to_string(userID) , token, {}, "DELETE");
+                    return DiscordAPI::call("/guilds/" + (guildID) + "/members/" + (userID) , token, {}, "DELETE");
                 }
             }
             namespace bans{
                 inline json get(snowflake guildID, std::string token = data::lastToken()){
-                    return DiscordAPI::call("/guilds/" + std::to_string(guildID) + "/bans", token, {}, "GET");
+                    return DiscordAPI::call("/guilds/" + (guildID) + "/bans", token, {}, "GET");
                 }
                 inline json create(snowflake guildID, snowflake userID, int deleteMessageDays = 1, std::string token = data::lastToken()){
-                    std::string callURL = "/guilds/" + std::to_string(guildID) + "/bans/" + std::to_string(userID);
+                    std::string callURL = "/guilds/" + (guildID) + "/bans/" + (userID);
 
                     json toSend;
                     toSend["delete-message-days"] = deleteMessageDays;
@@ -250,33 +250,33 @@ namespace discordpp{
                     return DiscordAPI::call(callURL, token, toSend, "PUT");
                 }
                 inline json remove(snowflake guildID, snowflake userID, std::string token = data::lastToken()){
-                    return DiscordAPI::call("/guilds/" + std::to_string(guildID) + "/bans/" + std::to_string(userID) , token, {}, "DELETE");
+                    return DiscordAPI::call("/guilds/" + (guildID) + "/bans/" + (userID) , token, {}, "DELETE");
                 }
             }
             namespace roles{
                 inline json get(snowflake guildID, std::string token = data::lastToken()){
-                    return DiscordAPI::call("/guilds/" + std::to_string(guildID) + "/roles", token, {}, "GET");
+                    return DiscordAPI::call("/guilds/" + (guildID) + "/roles", token, {}, "GET");
                 }
                 inline json create(snowflake guildID, std::string token = data::lastToken()){
-                    return DiscordAPI::call("/guilds/" + std::to_string(guildID) + "/roles", token, {}, "POST");
+                    return DiscordAPI::call("/guilds/" + (guildID) + "/roles", token, {}, "POST");
                 }
                 inline json modifyBatch(snowflake guildID, std::vector<json> newParams, std::string token = data::lastToken()) {
                     json toSend;
                     for(json role : newParams){
                         toSend.push_back(role);
                     }
-                    return DiscordAPI::call("/guilds/" + std::to_string(guildID) + "/roles", token, toSend, "PATCH");
+                    return DiscordAPI::call("/guilds/" + (guildID) + "/roles", token, toSend, "PATCH");
                 }
                 inline json modify(snowflake guildID, snowflake roleID, json newParams, std::string token = data::lastToken()) {
-                    return DiscordAPI::call("/guilds/" + std::to_string(guildID) + "/roles/" + std::to_string(roleID), token, newParams, "PATCH");
+                    return DiscordAPI::call("/guilds/" + (guildID) + "/roles/" + (roleID), token, newParams, "PATCH");
                 }
                 inline json remove(snowflake guildID, snowflake roleID, std::string token = data::lastToken()){
-                    return DiscordAPI::call("/guilds/" + std::to_string(guildID) + "/role/" + std::to_string(roleID) , token, {}, "DELETE");
+                    return DiscordAPI::call("/guilds/" + (guildID) + "/role/" + (roleID) , token, {}, "DELETE");
                 }
             }
             namespace prune{
                 inline json getCount(snowflake guildID, int days, std::string token = data::lastToken()){
-                    std::string callURL = "/guilds/" + std::to_string(guildID) + "/prune";
+                    std::string callURL = "/guilds/" + (guildID) + "/prune";
 
                     json toSend;
                     toSend["days"] = days;
@@ -284,7 +284,7 @@ namespace discordpp{
                     return DiscordAPI::call(callURL, token, toSend, "GET");
                 }
                 inline json begin(snowflake guildID, int days, std::string token = data::lastToken()){
-                    std::string callURL = "/guilds/" + std::to_string(guildID) + "/prune";
+                    std::string callURL = "/guilds/" + (guildID) + "/prune";
 
                     json toSend;
                     toSend["days"] = days;
@@ -293,17 +293,17 @@ namespace discordpp{
                 }
             }
             inline json getVoiceRegions(snowflake guildID, std::string token = data::lastToken()){
-                return DiscordAPI::call("/guilds/" + std::to_string(guildID) + "/regions", token, {}, "GET");
+                return DiscordAPI::call("/guilds/" + (guildID) + "/regions", token, {}, "GET");
             }
             inline json getInvites(snowflake guildID, std::string token = data::lastToken()){
-                return DiscordAPI::call("/guilds/" + std::to_string(guildID) + "/invites", token, {}, "GET");
+                return DiscordAPI::call("/guilds/" + (guildID) + "/invites", token, {}, "GET");
             }
             namespace integrations {
                 inline json get(snowflake guildID, std::string token = data::lastToken()){
-                    return DiscordAPI::call("/guilds/" + std::to_string(guildID) + "/integrations", token, {}, "GET");
+                    return DiscordAPI::call("/guilds/" + (guildID) + "/integrations", token, {}, "GET");
                 }
                 inline json create(snowflake guildID, std::string type, snowflake userID, std::string token = data::lastToken()){
-                    std::string callURL = "/guilds/" + std::to_string(guildID) + "/integrations";
+                    std::string callURL = "/guilds/" + (guildID) + "/integrations";
 
                     json toSend;
                     toSend["type"] = type;
@@ -312,7 +312,7 @@ namespace discordpp{
                     return DiscordAPI::call(callURL, token, toSend, "POST");
                 }
                 inline json modify(snowflake guildID, snowflake integrationID, int expire_behavior, int expire_grace_period, bool enable_emoticons, std::string token = data::lastToken()){
-                    std::string callURL = "/guilds/" + std::to_string(guildID) + "/integrations/" + std::to_string(integrationID);
+                    std::string callURL = "/guilds/" + (guildID) + "/integrations/" + (integrationID);
 
                     json toSend;
                     toSend["expire_behavior"] = expire_behavior;
@@ -322,18 +322,18 @@ namespace discordpp{
                     return DiscordAPI::call(callURL, token, toSend, "POST");
                 }
                 inline json remove(snowflake guildID, snowflake integrationID, std::string token = data::lastToken()){
-                    return DiscordAPI::call("/guilds/" + std::to_string(guildID) + "/integrations/" + std::to_string(integrationID), token, {}, "DELETE");
+                    return DiscordAPI::call("/guilds/" + (guildID) + "/integrations/" + (integrationID), token, {}, "DELETE");
                 }
                 inline json sync(snowflake guildID, snowflake integrationID, std::string token = data::lastToken()){
-                    return DiscordAPI::call("/guilds/" + std::to_string(guildID) + "/integrations/" + std::to_string(integrationID) + "/sync", token, {}, "POST");
+                    return DiscordAPI::call("/guilds/" + (guildID) + "/integrations/" + (integrationID) + "/sync", token, {}, "POST");
                 }
             }
             namespace embed {
                 inline json get(snowflake guildID, std::string token = data::lastToken()){
-                    return DiscordAPI::call("/guilds/" + std::to_string(guildID) + "/embed", token, {}, "GET");
+                    return DiscordAPI::call("/guilds/" + (guildID) + "/embed", token, {}, "GET");
                 }
                 inline json modify(snowflake guildID, json newParams, std::string token = data::lastToken()) {
-                    return DiscordAPI::call("/guilds/" + std::to_string(guildID) + "/embed", token, newParams, "PATCH");
+                    return DiscordAPI::call("/guilds/" + (guildID) + "/embed", token, newParams, "PATCH");
                 }
             }
         }
@@ -373,7 +373,7 @@ namespace discordpp{
                 return DiscordAPI::call(callURL, token, toSend, "POST");
             }
             inline json getUser(snowflake userID, std::string token = data::lastToken()){
-                return DiscordAPI::call("/users/" + std::to_string(userID), token, {}, "GET");
+                return DiscordAPI::call("/users/" + (userID), token, {}, "GET");
             }
             namespace self{
                 inline json get(std::string token = data::lastToken()){
@@ -387,7 +387,7 @@ namespace discordpp{
                     return DiscordAPI::call("/users/@me/guilds", token, {}, "GET");
                 }
                 inline json leaveGuild(snowflake guildID, std::string token = data::lastToken()){
-                    return DiscordAPI::call("/users/@me" + std::to_string(guildID), token, {}, "DELETE");
+                    return DiscordAPI::call("/users/@me" + (guildID), token, {}, "DELETE");
                 }
                 inline json getDMs(std::string token = data::lastToken()){
                     return DiscordAPI::call("/users/@me/channels", token, {}, "GET");
@@ -403,13 +403,13 @@ namespace discordpp{
 
         namespace invites {
             inline json get(snowflake inviteID, std::string token = data::lastToken()){
-                return DiscordAPI::call("/invites/" + std::to_string(inviteID), token, {}, "GET");
+                return DiscordAPI::call("/invites/" + (inviteID), token, {}, "GET");
             }
             inline json remove(snowflake inviteID, std::string token = data::lastToken()){
-                return DiscordAPI::call("/invites/" + std::to_string(inviteID), token, {}, "DELETE");
+                return DiscordAPI::call("/invites/" + (inviteID), token, {}, "DELETE");
             }
             inline json accept(snowflake inviteID, std::string token = data::lastToken()){
-                return DiscordAPI::call("/invites/" + std::to_string(inviteID), token, {}, "POST");
+                return DiscordAPI::call("/invites/" + (inviteID), token, {}, "POST");
             }
         }
 
@@ -434,7 +434,7 @@ namespace discordpp{
             client_.clear_access_channels(websocketpp::log::alevel::frame_payload);
 
             client_.set_tls_init_handler([this](websocketpp::connection_hdl){
-                return websocketpp::lib::make_shared<boost::asio::ssl::context>(boost::asio::ssl::context::tlsv1);
+                return websocketpp::lib::template make_shared<boost::asio::ssl::context>(boost::asio::ssl::context::tlsv1);
             });
 
             client_.init_asio(&asio_ios);
@@ -487,7 +487,7 @@ namespace discordpp{
         void keepalive(uint32_t ms){
             auto now = std::chrono::system_clock::now();
             auto duration = now.time_since_epoch();
-            auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+            auto millis = std::chrono::template duration_cast<std::chrono::milliseconds>(duration).count();
             json message = {
                     {"op", 1},
                     {"d", millis}
